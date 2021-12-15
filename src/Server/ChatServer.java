@@ -15,7 +15,9 @@ public class ChatServer {
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         List<PrintWriter> listWriters = new ArrayList<PrintWriter>();
-
+        List<ClientInfo> clientInfo = new ArrayList<ClientInfo>();
+        RoomManager roomManager = new RoomManager();
+        
         try {
 // 1. 서버 소켓 생성
             serverSocket = new ServerSocket();
@@ -25,27 +27,37 @@ public class ChatServer {
             serverSocket.bind( new InetSocketAddress("127.0.0.1", PORT) );
             consoleLog("연결 기다림 - " + "127.0.0.1" + ":" + PORT);
 
+            
 // 3. 요청 대기
             while(true) {
+            	
+            	
                 Socket socket = serverSocket.accept();	//클라이언트와 연결되면
-                new ChatServerProcessThread(socket, listWriters).start();	//챗 서버 프로세스 스레드를 실행 매개변수로는 해당 클라이언트의 소켓과 클라이언트 정보가 저장될 listWriters를 넘겨준다.
+                new ChatServerProcessThread(socket, listWriters, clientInfo, roomManager).start();	//챗 서버 프로세스 스레드를 실행 매개변수로는 해당 클라이언트의 소켓과 클라이언트 정보가 저장될 listWriters를 넘겨준다. 클라이언트의 닉네임과 같은 정보는 clientInfo에 저장된다.
             }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
         finally {
+        	
             try {
                 if( serverSocket != null && !serverSocket.isClosed() ) {
                     serverSocket.close();
                 }
+                
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    
+    
     private static void consoleLog(String log) {
         System.out.println("[server " + Thread.currentThread().getId() + "] " + log);
     }
+    
 }
+
+
